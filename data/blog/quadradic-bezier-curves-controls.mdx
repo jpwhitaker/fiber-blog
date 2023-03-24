@@ -1,0 +1,84 @@
+---
+title: 'Quadradic Bezier Curves Pivot Controls'
+date: 2023-03-23T15:32:14Z
+lastmod: '2021-02-01'
+tags: ['@react-three/fiber', '@react-three/drei']
+draft: false
+summary: 'Adding PivotControls to a Cubic Bezier Curve'
+layout: PostSimple
+bibliography: references-data.bib
+canonicalUrl: https://tailwind-nextjs-starter-blog.vercel.app/blog/new-features-in-v1/
+---
+
+import { CodeSandbox } from 'mdx-embed/dist/components/codesandbox'
+
+## Overview
+
+<CodeSandbox codeSandboxId="moving-wire-4lnxlk" />
+
+The sandbox above shows how to make a QuadraticBezierLine between two components.
+
+Scrolling currently breaks the link between the wire and the box positions.
+
+```jsx showLineNumbers
+import { Canvas, useFrame } from '@react-three/fiber'
+import {
+  QuadraticBezierLine,
+  PerspectiveCamera,
+  Box,
+  ScrollControls,
+  Scroll,
+  PivotControls,
+} from '@react-three/drei'
+import { Matrix4, Vector3 } from 'three'
+import { useRef } from 'react'
+
+export const App = () => {
+  //Setup initial positions of the gizmos
+  const gizmoMatrix1 = new Matrix4()
+  const gizmoMatrix2 = new Matrix4()
+  gizmoMatrix1.setPosition(-2, 0, 0)
+  gizmoMatrix2.setPosition(2, 2, 0)
+  const box1Ref = useRef()
+  const box2Ref = useRef()
+
+  return (
+    <Canvas>
+      <PerspectiveCamera makeDefault position={[0, 0, 15]} />
+      <ScrollControls damping={0} pages={5}>
+        <Scroll>
+          {/* box 1 */}
+          <PivotControls matrix={gizmoMatrix1} anchor={[0, 0, 0]}>
+            <Box ref={box1Ref} position={[0, 0, 0]} />
+          </PivotControls>
+          {/* box 2 */}
+          <PivotControls matrix={gizmoMatrix2} anchor={[0, 0, 0]}>
+            <Box ref={box2Ref} position={[0, 0, 0]} />
+          </PivotControls>
+          {/* Wire */}
+          <SlackWire startObj={box1Ref} endObj={box2Ref} />
+        </Scroll>
+      </ScrollControls>
+    </Canvas>
+  )
+}
+
+function SlackWire({ startObj, mid, endObj, v1 = new Vector3(), v2 = new Vector3() }) {
+  const ref = useRef()
+  useFrame(() => {
+    const startPos = startObj.current.getWorldPosition(v1)
+    const endPos = endObj.current.getWorldPosition(v2)
+    ref.current.setPoints(startPos, endPos)
+  }, [])
+  return (
+    <QuadraticBezierLine
+      ref={ref}
+      start={[-1, 0, 0]}
+      end={[1, 0, 0]}
+      lineWidth={4}
+      fog={true}
+      color={'#474747'}
+    ></QuadraticBezierLine>
+  )
+}
+```

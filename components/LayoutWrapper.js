@@ -6,6 +6,14 @@ import SectionContainer from './SectionContainer'
 import Footer from './Footer'
 import MobileNav from './MobileNav'
 import ThemeSwitch from './ThemeSwitch'
+import { MDXProvider } from '@mdx-js/react'
+import { CodeSandbox } from 'mdx-embed/dist/components/codesandbox'
+import { Gist } from 'mdx-embed/dist/components/gist'
+
+const components = {
+  CodeSandbox,
+  Gist,
+}
 
 const LayoutWrapper = ({ children }) => {
   return (
@@ -44,7 +52,9 @@ const LayoutWrapper = ({ children }) => {
             <MobileNav />
           </div>
         </header>
-        <main className="mb-auto">{children}</main>
+        <MDXProvider components={components}>
+          <main className="mb-auto">{children}</main>
+        </MDXProvider>
         <Footer />
       </div>
     </SectionContainer>
